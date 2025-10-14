@@ -70,36 +70,41 @@ class TestBurger:
         receipt = burger.get_receipt()
         assert receipt.startswith("(==== красная булочка ====)")
 
-    def test_receipt_contains_sauce_ingredient_line(self, burger, mock_bun):
+    def test_receipt_contains_ingredient_lines(self, burger, mock_bun):
         mock_bun.get_name.return_value = "красная булочка"
         mock_bun.get_price.return_value = 100
+
         sauce = Mock()
         sauce.get_type.return_value = "SAUCE"
         sauce.get_name.return_value = "острый соус"
         sauce.get_price.return_value = 50
-        burger.set_buns(mock_bun)
-        burger.add_ingredient(sauce)
-        receipt = burger.get_receipt()
-        receipt_lines = receipt.split('\n')
-        assert "= sauce острый соус =" in receipt_lines
 
-    def test_receipt_contains_filling_ingredient_line(self, burger, mock_bun):
-        mock_bun.get_name.return_value = "красная булочка"
-        mock_bun.get_price.return_value = 100
         cutlet = Mock()
         cutlet.get_type.return_value = "FILLING"
         cutlet.get_name.return_value = "котлета"
         cutlet.get_price.return_value = 50
+
         burger.set_buns(mock_bun)
+        burger.add_ingredient(sauce)
         burger.add_ingredient(cutlet)
+
         receipt = burger.get_receipt()
-        receipt_lines = receipt.split('\n')
-        assert "= filling котлета =" in receipt_lines
+
+        expected_receipt = (
+            "(==== красная булочка ====)\n"
+            "= sauce острый соус =\n"
+            "= filling котлета =\n"
+            "(==== красная булочка ====)\n\n"
+            "Price: 300"
+        )
+        assert receipt == expected_receipt
 
     def test_receipt_ends_with_correct_price(self, burger, mock_bun):
         mock_bun.get_name.return_value = "красная булочка"
         mock_bun.get_price.return_value = 100
         sauce = Mock()
+        sauce.get_type.return_value = "SAUCE"
+        sauce.get_name.return_value = "острый соус"
         sauce.get_price.return_value = 50
         burger.set_buns(mock_bun)
         burger.add_ingredient(sauce)
